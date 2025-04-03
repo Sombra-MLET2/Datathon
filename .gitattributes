@@ -1,2 +1,7 @@
-*.json filter=lfs diff=lfs merge=lfs -text
-*.db filter=lfs diff=lfs merge=lfs -text
+# Data
+data/json/applicants.json filter=lfs diff=lfs merge=lfs -text
+data/json/prospects.json filter=lfs diff=lfs merge=lfs -text
+data/json/vagas.json filter=lfs diff=lfs merge=lfs -text
+data/sql/applicants.db filter=lfs diff=lfs merge=lfs -text
+data/sql/prospects.db filter=lfs diff=lfs merge=lfs -text
+data/sql/vagas.db filter=lfs diff=lfs merge=lfs -text

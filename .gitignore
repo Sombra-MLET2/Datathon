@@ -1,4 +1,4 @@
-.idea
-.vs
-.venv
+.idea/
+.vs/
+.venv/
 **/__pycache__/
