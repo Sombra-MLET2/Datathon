@@ -1,4 +1,8 @@
+# Directories
 .idea/
 .vs/
 .venv/
 **/__pycache__/
+
+# Files
+datathon.db
