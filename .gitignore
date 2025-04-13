@@ -6,3 +6,6 @@
 
 # Files
 datathon.db
+data/chroma_storage/*.sqlite3
+data/chroma_storage/**/*.bin
+data/chroma_storage/**/*.pickle

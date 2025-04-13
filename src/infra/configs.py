@@ -1,5 +1,7 @@
+import logging
 import os
 
+logger = logging.getLogger("uvicorn")
 
 ENV = os.getenv('MUSH_ENV') if os.getenv('MUSH_ENV') else 'dev'
 SQLALCHEMY_DATABASE_URL = os.getenv('MUSH_DATABASE_URL') if os.getenv('MUSH_DATABASE_URL') else "sqlite:///./datathon.db"
