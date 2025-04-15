@@ -1,10 +1,12 @@
 import json
+from textwrap import dedent
+from typing import cast
 
 from tqdm import tqdm
 
 from src.infra.chroma_database import chroma_client, model_transformer
 from src.infra.configs import logger
-from src.models.candidate import CandidateSearch
+from src.models.candidate import CandidateSearch, Candidate, InformacoesProfissionais
 
 BATCH_SIZE = 10
 
@@ -78,6 +80,41 @@ def search_candidates(search_request: CandidateSearch):
     return hits
 
 
+def index_single_applicant(candidate: Candidate):
+    try:
+        logger.info(
+            f"✏️ Indexing candidate {candidate.infos_basicas.codigo_profissional} : '{candidate.infos_basicas.nome}'")
+
+        codigo_profissional = candidate.infos_basicas.codigo_profissional
+
+        ids = [codigo_profissional]
+        documents = [_build_embedding_input(candidate)]
+        metadatas = [
+            {
+                "codigo_profissional": codigo_profissional,
+                "nome": candidate.infos_basicas.nome,
+                "email": candidate.infos_basicas.email,
+                "telefone": candidate.infos_basicas.telefone,
+                "area_atuacao": candidate.informacoes_profissionais.area_atuacao,
+            }
+        ]
+
+        collection = chroma_client.get_collection("candidates_collection")
+        collection.add(
+            ids=ids,
+            documents=documents,
+            metadatas=metadatas
+        )
+
+        logger.info(
+            f"☑️Candidate {candidate.infos_basicas.codigo_profissional} : '{candidate.infos_basicas.nome}' was indexed")
+
+    except Exception as e:
+        logger.error(f"❌ Error indexing candidate: {e}")
+        raise Exception(f"❌ Error indexing candidate {candidate.infos_basicas.codigo_profissional} : '{candidate.infos_basicas.nome}'")
+
+
+
 def reset_candidates_collection():
     try:
         chroma_client.delete_collection("candidates_collection")
@@ -88,11 +125,23 @@ def reset_candidates_collection():
 
 
 def _build_embedding_input(candidate):
+    if type(candidate) is not dict:
+        candidate = cast(Candidate, candidate)
+        prof: InformacoesProfissionais = candidate.informacoes_profissionais
+
+        return dedent(f"""
+        Portuguese CV: {candidate.cv_pt}
+        English CV: {candidate.cv_en}
+        Professional Title: {prof.titulo_profissional}
+        Certificates: {prof.certificacoes}
+        Professional Level: {prof.nivel_profissional}
+        """)
+
     prof = candidate.get("informacoes_profissionais", {})
-    return f"""
+    return dedent(f"""
     Portuguese CV: {candidate.get("cv_pt", "")}
     English CV: {candidate.get("cv_en", "")}
     Professional Title: {prof.get("titulo_profissional", "")}
     Certificates: {prof.get("certificacoes", "")}
     Professional Level: {prof.get("nivel_profissional", "")}
-    """
+    """)

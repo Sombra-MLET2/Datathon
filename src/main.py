@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 
-from src.services.embeddings_service import index_all_applicants, reset_candidates_collection, search_candidates
+from src.services.embeddings_service import index_all_applicants, reset_candidates_collection, search_candidates, \
+    index_single_applicant
 from src.infra.database import engine, Base
-from src.models.candidate import CandidateSearch
+from src.models.candidate import CandidateSearch, Candidate
 from src.sessions.route import sessions_router
 
 
@@ -44,7 +45,16 @@ async def delete_embeddings():
     return {"success": True}
 
 
-@app.post("/candidates", tags=["candidates"], summary="Search candidates with embeddings")
+@app.post("/candidates", tags=["candidates"], summary="Index applicants into embeddings db")
+async def index_applicants(candidate: Candidate):
+    try:
+        index_single_applicant(candidate)
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.post("/candidates/search", tags=["candidates"], summary="Search candidates with embeddings")
 async def candidates(request: CandidateSearch):
     try:
         hits = search_candidates(request)
