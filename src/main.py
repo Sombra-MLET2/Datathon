@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 
-from src.services.embeddings_service import index_all_applicants, reset_candidates_collection, search_candidates, \
-    index_single_applicant
 from src.infra.database import engine, Base
-from src.models.candidate import CandidateSearch, Candidate
 from src.sessions.route import sessions_router
-
+from src.candidates.route import candidates_router
+from src.embeddings.route import embeddings_router
 
 app = FastAPI()
 app.include_router(sessions_router)
+app.include_router(candidates_router)
+app.include_router(embeddings_router)
 
 # SQLAlchemy create tables
 Base.metadata.create_all(engine)
@@ -24,44 +24,3 @@ async def root():
         }
     }
 
-
-@app.post("/embeddings/database", tags=["embeddings"], summary="Bootstrap the database with embeddings")
-async def bootstrap_embeddings():
-    try:
-        index_all_applicants()
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-    return {"success": True}
-
-
-@app.delete("/embeddings/database", tags=["embeddings"], summary="Delete the database")
-async def delete_embeddings():
-    try:
-        reset_candidates_collection()
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-    return {"success": True}
-
-
-@app.post("/candidates", tags=["candidates"], summary="Index applicants into embeddings db")
-async def index_applicants(candidate: Candidate):
-    try:
-        index_single_applicant(candidate)
-        return {"success": True}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-
-@app.post("/candidates/search", tags=["candidates"], summary="Search candidates with embeddings")
-async def candidates(request: CandidateSearch):
-    try:
-        hits = search_candidates(request)
-        return {
-            "success": True,
-            "found": len(hits),
-            "candidates": hits
-        }
-    except Exception as e:
-        return {"success": False, "error": str(e)}

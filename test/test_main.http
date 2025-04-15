@@ -19,7 +19,7 @@ Content-Type: application/json
 
 {
   "top_candidates": 5,
-  "job_description": "Operations Lead\n\nRoles & Responsibilities:\n• The Operations Manager is accountable for delivering the run services towards a client or a specific set of clients.\n• The Operations Manager has a firm working relation with the SDM who is accountable for the overall contractual compliance of all services and projects.\n• Responsible for the delivery of the services from multiple Service Lines.\n• Operations Manager ensures that the services are deliver according to the SLA,"
+  "job_description": "Operations Lead\n\nRoles & Responsibilities:\n• The Operations Manager is accountable for delivering the run embeddings towards a client or a specific set of clients.\n• The Operations Manager has a firm working relation with the SDM who is accountable for the overall contractual compliance of all embeddings and projects.\n• Responsible for the delivery of the embeddings from multiple Service Lines.\n• Operations Manager ensures that the embeddings are deliver according to the SLA,"
 }
 
 ###
