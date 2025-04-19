@@ -1,0 +1,6 @@
+data/chroma_storage/
+data/json/
+**/*.sqlite3
+**/*.bin
+**/*.pickle
+run-with-volumes.sh
