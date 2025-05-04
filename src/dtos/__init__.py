@@ -1,0 +1,2 @@
+from src.dtos.applicant_dto import ApplicantBaseDTO, ApplicantCreateDTO, ApplicantResponseDTO, ApplicantListResponseDTO
+from src.dtos.job_vacancy_dto import JobVacancyBaseDTO, JobVacancyCreateDTO, JobVacancyResponseDTO, JobVacancyListResponseDTO
