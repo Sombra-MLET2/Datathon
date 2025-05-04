@@ -1,34 +1,69 @@
-# Configuration
+# Sombra Recruitment System
 
-## Requirement
+A human resource system that helps recruiters select better job candidates.
 
-## Setup Virtual Environment
+## Features
 
-### 1. Create a Virtual Environment
+- Responsive UI
+- User authentication (simple login/register)
+- Applicant management
+- Job vacancy management
+- Candidates recommended by vacancy
+- Candidates chance to receive an offer—TODO
+
+## API Endpoints
+
+- `/api/sessions` - User authentication
+- `/api/job-vacancies` - Job vacancy management
+- `/api/candidates` - Candidate search
+- `/api/bootstrap` - Data initialization - Admin purposes only
+
+## Configuration
+
+### Requirements
+
+- Python 3.12+
+- Node.js 16+ (for frontend)
+- npm 8+ (for frontend)
+
+### Setup Virtual Environment
+
+#### 1. Create a Virtual Environment
 ```bash
-    python -m venv .venv
+  python -m venv .venv
 ```
 
-### 2. Active the Virtual Environment
+#### 2. Activate the Virtual Environment
 ```bash
-    source .venv/bin/activate
+  source .venv/bin/activate
 ```
 
-### 3. Install Dependencies
+#### 3. Install Dependencies
 ```bash
-    pip install --upgrade pip
-    pip install -r requirements.txt
+  pip install --upgrade pip
+  pip install -r requirements.txt
 ```
 
-### 4. Running the API
+### Build the Frontend
+
 ```bash
-    uvicorn src.main:app --host 0.0.0.0 --port 8000
+  ./build_frontend.sh
 ```
+
+### Running the API with Frontend
+```bash
+  uvicorn src.main:app --host 0.0.0.0 --port 8000
+```
+
+## Deployment - Docker
+
+TODO
 
 ## Note
-because of the size of the files in the data directory, if you need to download them, run the following commands.
-git large file storage(lfs) is required
+Because of the size of the files in the data directory, if you need to download them, run the following commands.
+Git large file storage(lfs) is required
+
 ```bash
-    git lfs install
-    git lfs pull
+  git lfs install
+  git lfs pull
 ```

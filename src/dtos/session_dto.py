@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr, PositiveInt
+from typing import List
 
 class Token(BaseModel):
     access_token: str
@@ -15,3 +16,16 @@ class User(BaseModel):
 
 class TokenData(BaseModel):
     email: str
+
+
+class UserListItem(BaseModel):
+    id: int
+    email: str
+    
+    class Config:
+        orm_mode = True
+
+
+class UserListResponse(BaseModel):
+    users: List[UserListItem]
+    total: int
