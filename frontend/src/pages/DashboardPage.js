@@ -28,10 +28,12 @@ import {
   ExitToApp as LogoutIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const DashboardPage = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [applicantsCount, setApplicantsCount] = useState(null);
   const [vacanciesCount, setVacanciesCount] = useState(null);
@@ -65,6 +67,10 @@ const DashboardPage = () => {
     setDrawerOpen(!drawerOpen);
   };
 
+  const navigateTo = (path) => {
+    navigate(path);
+  };
+
   const drawerContent = (
     <Box sx={{ width: 250 }} role="presentation">
       <Box sx={{ p: 2 }}>
@@ -81,13 +87,13 @@ const DashboardPage = () => {
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button>
+        <ListItem button onClick={() => navigateTo('/applicants')}>
           <ListItemIcon>
             <PersonIcon />
           </ListItemIcon>
           <ListItemText primary="Applicants" />
         </ListItem>
-        <ListItem button>
+        <ListItem button onClick={() => navigateTo('/job-vacancies')}>
           <ListItemIcon>
             <WorkIcon />
           </ListItemIcon>
@@ -205,6 +211,15 @@ const DashboardPage = () => {
                       <Typography variant="body2" color="text.secondary">
                         Total job vacancies available
                       </Typography>
+                      <Box mt={2}>
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          onClick={() => navigateTo('/job-vacancies')}
+                        >
+                          View Job Vacancies
+                        </Button>
+                      </Box>
                     </>
                   )}
                 </CardContent>

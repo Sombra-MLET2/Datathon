@@ -5,6 +5,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import JobVacanciesPage from './pages/JobVacanciesPage';
+import JobVacancyDetailPage from './pages/JobVacancyDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -67,6 +69,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/job-vacancies" 
+            element={
+              <ProtectedRoute>
+                <JobVacanciesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/job-vacancies/:id" 
+            element={
+              <ProtectedRoute>
+                <JobVacancyDetailPage />
               </ProtectedRoute>
             } 
           />
