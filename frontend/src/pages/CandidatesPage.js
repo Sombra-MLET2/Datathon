@@ -36,34 +36,34 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const JobVacanciesPage = () => {
+const CandidatesPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [vacancies, setVacancies] = useState([]);
+  const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalVacancies, setTotalVacancies] = useState(0);
+  const [totalCandidates, setTotalCandidates] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    fetchVacancies();
+    fetchCandidates();
   }, [page, rowsPerPage]);
 
-  const fetchVacancies = async () => {
+  const fetchCandidates = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/job-vacancies/?page=${page + 1}&page_size=${rowsPerPage}`);
-      setVacancies(response.data.items);
-      setTotalVacancies(response.data.total);
+      const response = await axios.get(`/api/candidates/?page=${page + 1}&page_size=${rowsPerPage}`);
+      setCandidates(response.data.items);
+      setTotalCandidates(response.data.total);
       setTotalPages(response.data.total_pages);
       setError('');
     } catch (err) {
-      console.error('Error fetching vacancies:', err);
-      setError('Failed to load job vacancies. Please try again later.');
+      console.error('Error fetching candidates:', err);
+      setError('Failed to load candidates. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -78,8 +78,8 @@ const JobVacanciesPage = () => {
     setPage(0);
   };
 
-  const handleViewVacancy = (id) => {
-    navigate(`/job-vacancies/${id}`);
+  const handleViewCandidate = (id) => {
+    navigate(`/candidates/${id}`);
   };
 
   const formatDate = (dateString) => {
@@ -112,15 +112,15 @@ const JobVacanciesPage = () => {
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button onClick={() => navigateTo('/candidates')}>
+        <ListItem button selected onClick={() => navigateTo('/candidates')}>
           <ListItemIcon>
-            <PersonIcon />
+            <PersonIcon color="primary" />
           </ListItemIcon>
           <ListItemText primary="Candidates" />
         </ListItem>
-        <ListItem button selected onClick={() => navigateTo('/job-vacancies')}>
+        <ListItem button onClick={() => navigateTo('/job-vacancies')}>
           <ListItemIcon>
-            <WorkIcon color="primary" />
+            <WorkIcon />
           </ListItemIcon>
           <ListItemText primary="Job Vacancies" />
         </ListItem>
@@ -151,7 +151,7 @@ const JobVacanciesPage = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Job Vacancies
+            Candidates
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
           <Button color="inherit" onClick={logout}>
@@ -180,11 +180,11 @@ const JobVacanciesPage = () => {
       >
         <Container maxWidth="lg">
           <Typography variant="h4" gutterBottom>
-            Job Vacancies
+            Candidates
           </Typography>
           
           <Typography variant="body1" paragraph>
-            Browse all available job vacancies in the system.
+            Browse all available candidates in the system.
           </Typography>
           
           {error && (
@@ -201,36 +201,34 @@ const JobVacanciesPage = () => {
             ) : (
               <>
                 <TableContainer>
-                  <Table sx={{ minWidth: 650 }} aria-label="job vacancies table">
+                  <Table sx={{ minWidth: 650 }} aria-label="candidates table">
                     <TableHead>
                       <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Title</TableCell>
-                        <TableCell>Client</TableCell>
-                        <TableCell>Location</TableCell>
-                        <TableCell>Date</TableCell>
+                        <TableCell>Code</TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Gender</TableCell>
+                        <TableCell>Creation Date</TableCell>
                         <TableCell align="right">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {vacancies.map((vacancy) => (
+                      {candidates.map((candidate) => (
                         <TableRow
-                          key={vacancy.id}
+                          key={candidate.id}
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
                           <TableCell component="th" scope="row">
-                            {vacancy.vaga_id}
+                            {candidate.codigo_profissional}
                           </TableCell>
-                          <TableCell>{vacancy.titulo_vaga}</TableCell>
-                          <TableCell>{vacancy.cliente}</TableCell>
-                          <TableCell>{`${vacancy.cidade}, ${vacancy.estado}, ${vacancy.pais}`}</TableCell>
-                          <TableCell>{formatDate(vacancy.data_requicisao)}</TableCell>
+                          <TableCell>{candidate.nome}</TableCell>
+                          <TableCell>{candidate.sexo || 'Not specified'}</TableCell>
+                          <TableCell>{formatDate(candidate.data_criacao)}</TableCell>
                           <TableCell align="right">
                             <Button
                               variant="contained"
                               size="small"
                               startIcon={<VisibilityIcon />}
-                              onClick={() => handleViewVacancy(vacancy.id)}
+                              onClick={() => handleViewCandidate(candidate.id)}
                             >
                               View
                             </Button>
@@ -243,7 +241,7 @@ const JobVacanciesPage = () => {
                 <TablePagination
                   rowsPerPageOptions={[10, 25, 50, 100]}
                   component="div"
-                  count={totalVacancies}
+                  count={totalCandidates}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onPageChange={handleChangePage}
@@ -258,4 +256,4 @@ const JobVacanciesPage = () => {
   );
 };
 
-export default JobVacanciesPage;
+export default CandidatesPage;

@@ -20,6 +20,9 @@ class ApplicantService:
     def get_applicant_by_codigo(self, codigo: str) -> Optional[Applicant]:
         """Get an applicant by codigo_profissional"""
         return self.repository.get_by_codigo_profissional(codigo)
+
+    def get_applicants_by_codigo(self, codigos: List[str]):
+        return self.repository.get_many_by_codigo_profissional(codigos)
     
     def get_applicants(self, skip: int = 0, limit: int = 100) -> List[Applicant]:
         """Get all applicants with pagination"""

@@ -21,10 +21,16 @@ import {
   CardContent,
   Chip,
   Stack,
-  Breadcrumbs
+  Breadcrumbs,
+  ToggleButtonGroup,
+  ToggleButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  LinearProgress
 } from '@mui/material';
-import { 
-  Menu as MenuIcon, 
+import {
+  Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Person as PersonIcon,
   Work as WorkIcon,
@@ -33,7 +39,10 @@ import {
   LocationOn as LocationIcon,
   Business as BusinessIcon,
   CalendarToday as CalendarIcon,
-  Assignment as AssignmentIcon
+  Assignment as AssignmentIcon,
+  Search as SearchIcon,
+  ExpandMore as ExpandMoreIcon,
+  Visibility as VisibilityIcon, Insights
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useParams, Link } from 'react-router-dom';
@@ -47,6 +56,12 @@ const JobVacancyDetailPage = () => {
   const [vacancy, setVacancy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [topCandidatesCount, setTopCandidatesCount] = useState(10);
+  const [searchingCandidates, setSearchingCandidates] = useState(false);
+  const [topCandidates, setTopCandidates] = useState([]);
+  const [searchError, setSearchError] = useState('');
+  const [searchSuccess, setSearchSuccess] = useState(false);
+  const [foundCount, setFoundCount] = useState(0);
 
   useEffect(() => {
     const fetchVacancyDetails = async () => {
@@ -66,6 +81,57 @@ const JobVacancyDetailPage = () => {
     fetchVacancyDetails();
   }, [id]);
 
+  const handleTopCandidatesCountChange = (event, newCount) => {
+    if (newCount !== null) {
+      setTopCandidatesCount(newCount);
+    }
+  };
+
+  const searchTopCandidates = async () => {
+    if (!vacancy) return;
+    
+    try {
+      setSearchingCandidates(true);
+      setSearchError('');
+      setTopCandidates([]);
+      setSearchSuccess(false);
+      setFoundCount(0);
+      
+      // Determine job description to use
+      const jobDescription = vacancy.principais_atividades || vacancy.competencia_tecnicas_e_comportamentais || '';
+      
+      if (!jobDescription) {
+        setSearchError('No job description available to search candidates.');
+        setSearchingCandidates(false);
+        return;
+      }
+      
+      const response = await axios.post('/api/candidates/search', {
+        top_candidates: topCandidatesCount,
+        job_description: jobDescription
+      });
+      
+      if (response.data.success) {
+        setSearchSuccess(true);
+        setFoundCount(response.data.found);
+        
+        // Sort candidates by similarity (highest to lowest)
+        const sortedCandidates = [...(response.data.candidates || [])].sort((a, b) => 
+          (b.similarity || 0) - (a.similarity || 0)
+        );
+        
+        setTopCandidates(sortedCandidates);
+      } else {
+        setSearchError('Search completed but no candidates were found.');
+      }
+    } catch (err) {
+      console.error('Error searching top candidates:', err);
+      setSearchError('Failed to search for top candidates. Please try again later.');
+    } finally {
+      setSearchingCandidates(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -78,6 +144,19 @@ const JobVacancyDetailPage = () => {
 
   const navigateTo = (path) => {
     navigate(path);
+  };
+
+  // Function to get color based on similarity score
+  const getSimilarityColor = (similarity) => {
+    // Convert similarity to a value between 0 and 1
+    const normalizedScore = similarity / 100;
+    
+    // Green for high scores, transitioning to blue for lower scores
+    if (normalizedScore > 0.8) return '#4caf50'; // Green
+    if (normalizedScore > 0.6) return '#81c784'; // Light Green
+    if (normalizedScore > 0.4) return '#64b5f6'; // Light Blue
+    if (normalizedScore > 0.2) return '#2196f3'; // Blue
+    return '#1976d2'; // Dark Blue
   };
 
   const drawerContent = (
@@ -96,11 +175,11 @@ const JobVacancyDetailPage = () => {
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button onClick={() => navigateTo('/applicants')}>
+        <ListItem button onClick={() => navigateTo('/candidates')}>
           <ListItemIcon>
             <PersonIcon />
           </ListItemIcon>
-          <ListItemText primary="Applicants" />
+          <ListItemText primary="Candidates" />
         </ListItem>
         <ListItem button selected onClick={() => navigateTo('/job-vacancies')}>
           <ListItemIcon>
@@ -132,6 +211,133 @@ const JobVacancyDetailPage = () => {
       </Typography>
     </Box>
   );
+
+  const renderCandidateResults = () => {
+    if (!searchSuccess || topCandidates.length === 0) {
+      return null;
+    }
+
+    return (
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Found {foundCount} Top Candidates
+        </Typography>
+        
+        {topCandidates.map((candidate) => (
+          <Accordion key={candidate.id} sx={{ mb: 1 }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls={`candidate-${candidate.id}-content`}
+              id={`candidate-${candidate.id}-header`}
+            >
+              <Grid container alignItems="center">
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="subtitle1">
+                    {candidate.nome}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Code: {candidate.codigo_profissional}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Typography variant="body2" color="text.secondary">
+                    {candidate.area_atuacao || 'Area not specified'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={2}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ width: '100%', mr: 1 }}>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={candidate.similarity || 0} 
+                        sx={{ 
+                          height: 8, 
+                          borderRadius: 5,
+                          backgroundColor: '#e0e0e0',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: getSimilarityColor(candidate.similarity || 0)
+                          }
+                        }}
+                      />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {Math.round(candidate.similarity || 0)}%
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={2} sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-end', gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="secondary"
+                    startIcon={<Insights />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert('This feature will be implemented in a future release.');
+                    }}
+                  >
+                    Offer Chances
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<VisibilityIcon />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateTo(`/candidates/${candidate.id}`);
+                    }}
+                  >
+                    View Profile
+                  </Button>
+                </Grid>
+              </Grid>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Resume Highlights:
+                </Typography>
+                <Paper 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 2, 
+                    maxHeight: '300px', 
+                    overflow: 'auto',
+                    whiteSpace: 'pre-line',
+                    backgroundColor: '#f9f9f9',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {candidate.cv_pt || 'No resume available'}
+                </Paper>
+                <Box sx={{ mt: 2, display: { xs: 'flex', sm: 'none' }, justifyContent: 'center', gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => {
+                      // Placeholder for future implementation
+                      alert('This feature will be implemented in a future release.');
+                    }}
+                    sx={{ flex: 1 }}
+                  >
+                    Offer Chances
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<VisibilityIcon />}
+                    onClick={() => navigateTo(`/candidates/${candidate.id}`)}
+                    sx={{ flex: 1 }}
+                  >
+                    View Full Profile
+                  </Button>
+                </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        ))}
+      </Box>
+    );
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -307,6 +513,68 @@ const JobVacancyDetailPage = () => {
                         <Typography variant="body1">
                           {vacancy.demais_observacoes || 'No additional observations.'}
                         </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Find Top Candidates
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                          Search for candidates that best match this job vacancy based on the job description.
+                        </Typography>
+                        
+                        <Box sx={{ mb: 3 }}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Number of candidates to find:
+                          </Typography>
+                          <ToggleButtonGroup
+                            value={topCandidatesCount}
+                            exclusive
+                            onChange={handleTopCandidatesCountChange}
+                            aria-label="number of top candidates"
+                            sx={{ mb: 2 }}
+                          >
+                            <ToggleButton value={5} aria-label="5 candidates">
+                              5
+                            </ToggleButton>
+                            <ToggleButton value={10} aria-label="10 candidates">
+                              10
+                            </ToggleButton>
+                            <ToggleButton value={25} aria-label="25 candidates">
+                              25
+                            </ToggleButton>
+                          </ToggleButtonGroup>
+                          
+                          <Button
+                            variant="contained"
+                            startIcon={<SearchIcon />}
+                            onClick={searchTopCandidates}
+                            disabled={searchingCandidates}
+                          >
+                            Search Top Candidates
+                          </Button>
+                        </Box>
+                        
+                        {searchError && (
+                          <Alert severity="error" sx={{ mb: 3 }}>
+                            {searchError}
+                          </Alert>
+                        )}
+                        
+                        {searchingCandidates ? (
+                          <Box display="flex" flexDirection="column" alignItems="center" my={3}>
+                            <CircularProgress size={60} sx={{ mb: 2 }} />
+                            <Typography variant="body1">
+                              Searching for the best candidates... This may take a moment.
+                            </Typography>
+                          </Box>
+                        ) : (
+                          renderCandidateResults()
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>

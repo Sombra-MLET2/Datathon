@@ -87,11 +87,11 @@ const DashboardPage = () => {
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button onClick={() => navigateTo('/applicants')}>
+        <ListItem button onClick={() => navigateTo('/candidates')}>
           <ListItemIcon>
             <PersonIcon />
           </ListItemIcon>
-          <ListItemText primary="Applicants" />
+          <ListItemText primary="Candidates" />
         </ListItem>
         <ListItem button onClick={() => navigateTo('/job-vacancies')}>
           <ListItemIcon>
@@ -187,6 +187,15 @@ const DashboardPage = () => {
                       <Typography variant="body2" color="text.secondary">
                         Total applicants in the system
                       </Typography>
+                      <Box mt={2}>
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          onClick={() => navigateTo('/candidates')}
+                        >
+                          View Candidates
+                        </Button>
+                      </Box>
                     </>
                   )}
                 </CardContent>

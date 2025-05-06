@@ -21,6 +21,9 @@ class ApplicantRepository:
     
     def get_by_codigo_profissional(self, codigo: str) -> Optional[Applicant]:
         return self.db.query(Applicant).filter(Applicant.codigo_profissional == codigo).first()
+
+    def get_many_by_codigo_profissional(self, codigos: List[str]) -> Optional[List[Applicant]]:
+        return self.db.query(Applicant).filter(Applicant.codigo_profissional.in_(codigos)).all()
     
     def get_all(self, skip: int = 0, limit: int = 100) -> List[Applicant]:
         return self.db.query(Applicant).offset(skip).limit(limit).all()

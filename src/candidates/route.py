@@ -27,14 +27,34 @@ async def index_applicants(candidate: Candidate):
         return {"success": False, "error": str(e)}
 
 
+def find_similarity(hits, codigo_profissional: str):
+    for hit in hits:
+        if hit['codigo_profissional'] == codigo_profissional:
+            return hit['similarity_score']
+
+    return 0.0
+
+
 @candidates_router.post("/search", tags=["candidates"], summary="Search candidates with embeddings")
-async def candidates(request: CandidateSearch):
+async def candidates(request: CandidateSearch, db: Session = Depends(get_db)):
     try:
+        applicant_service = ApplicantService(db)
         hits = search_candidates(request)
+
+        candidates_hits = applicant_service.get_applicants_by_codigo([hit['codigo_profissional'] for hit in hits])
+
         return {
             "success": True,
-            "found": len(hits),
-            "candidates": hits
+            "found": len(candidates_hits),
+            "candidates": [
+                {
+                    'id': candidate.id,
+                    'codigo_profissional': candidate.codigo_profissional,
+                    'nome': candidate.nome,
+                    'area_atuacao': candidate.area_atuacao,
+                    'cv_pt': candidate.cv_pt,
+                    'similarity': find_similarity(hits, candidate.codigo_profissional)
+                } for candidate in candidates_hits]
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
