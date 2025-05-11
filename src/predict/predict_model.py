@@ -14,9 +14,9 @@ class PredictModel:
 	def __load_model(model_name: str):
 		try:
 			if model_name == "RandomForest":
-				return joblib.load("model/RandomForest/model.gz")
+				return joblib.load("./model/train/RandomForest/model.gz")
 			elif model_name == "XGBoost":
-				return joblib.load("model/XGBoost/model.gz")
+				return joblib.load("./model/train/XGBoost/model.gz")
 			else:
 				return None
 		except:
@@ -26,7 +26,7 @@ class PredictModel:
 	@staticmethod
 	def __load_label_encoders():
 		try:
-			return joblib.load("model/label_encoders.gz")
+			return joblib.load("./model/train/label_encoders.gz")
 		except:
 			raise FileNotFoundError(f"Label encoders file not found")
 
@@ -34,7 +34,7 @@ class PredictModel:
 	@staticmethod
 	def __load_standard_scaler():
 		try:
-			return joblib.load("model/standard_scaler.gz")
+			return joblib.load("./model/train/standard_scaler.gz")
 		except:
 			raise FileNotFoundError(f"Standard scaler file not found")
 
@@ -42,7 +42,7 @@ class PredictModel:
 	@staticmethod
 	def __load_vectorizers():
 		try:
-			return joblib.load("model/vectorizers.gz")
+			return joblib.load("./model/train/vectorizers.gz")
 		except:
 			raise FileNotFoundError(f"Vectorizers file not found")
 

@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from src.predict.predict_model import PredictModel
 
 prediction_router = APIRouter(
 	prefix="/prediction",
