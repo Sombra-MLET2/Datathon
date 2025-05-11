@@ -36,6 +36,7 @@ COPY --from=frontend-builder /app/frontend/build /opt/app/frontend/build
 COPY src ./src
 COPY datathon.db .
 COPY data/chroma_storage ./data/chroma_storage
+COPY model/train ./model/train
 
 ENV PATH="/opt/app/venv/bin:$PATH"
 ENV PYTHONPATH="/opt/app"
