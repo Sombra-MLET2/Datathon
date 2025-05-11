@@ -10,6 +10,7 @@ from src.embeddings.route import embeddings_router
 from src.vacancies.routes import vacancies_router as job_vacancy_router
 from src.infra.bootstrap.route import boostrap_route as bootstrap_router
 from src.static.static import static_router, react_build_exists, REACT_BUILD_DIR
+from src.predict.routes import prediction_router
 
 app = FastAPI()
 app.add_middleware(
@@ -25,6 +26,7 @@ app.include_router(candidates_router, prefix="/api")
 app.include_router(embeddings_router, prefix="/api")
 app.include_router(job_vacancy_router, prefix="/api")
 app.include_router(bootstrap_router, prefix="/api")
+app.include_router(prediction_router, prefix="/api")
 
 # SQLAlchemy create tables
 Base.metadata.create_all(engine)

@@ -80,11 +80,11 @@ Random Forest F1: 0.7
 XGBoost F1: 0.74
 
 Number of records: 33585
-Random Forest Training Time: 37.51 s
-XGBoost Training Time: 780.11 s
+Random Forest Training Time: 53.24 s
+XGBoost Training Time: 1277.3 s
 
 Number of records: 11195
-Random Forest Inference Time: 0.67 s
-XGBoost Inference Time: 0.3 s
+Random Forest Inference Time: 1.32 s
+XGBoost Inference Time: 0.23 s
 ```
 <!-- END_SCORE -->
