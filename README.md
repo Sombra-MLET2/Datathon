@@ -73,18 +73,18 @@ Git large file storage(lfs) is required
 
 <!-- START_SCORE -->
 ```
-Random Forest Accuracy: 0.87
+Random Forest Accuracy: 0.88
 XGBoost Accuracy: 0.91
 
-Random Forest F1: 0.7
+Random Forest F1: 0.72
 XGBoost F1: 0.74
 
 Number of records: 33585
-Random Forest Training Time: 53.24 s
-XGBoost Training Time: 1277.3 s
+Random Forest Training Time: 58.87 s
+XGBoost Training Time: 577.15 s
 
 Number of records: 11195
-Random Forest Inference Time: 1.32 s
-XGBoost Inference Time: 0.23 s
+Random Forest Inference Time: 0.71 s
+XGBoost Inference Time: 0.19 s
 ```
 <!-- END_SCORE -->
