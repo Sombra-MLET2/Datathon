@@ -8,15 +8,18 @@ from src.models.job_vacancy import JobVacancy
 from src.models.applicant import Applicant
 
 
-vectorizers = joblib.load("./Model/RandomForest/vectorizers.gz")
-scaler = joblib.load("./Model/RandomForest/standard_scaler.gz")
-label_encoders = joblib.load("./Model/RandomForest/label_encoders.gz")
+vectorizers = joblib.load("./model/train/vectorizers.gz")
+scaler = joblib.load("./model/train/standard_scaler.gz")
+label_encoders = joblib.load("./model/train/label_encoders.gz")
 
 ml_model = None
+COEFMULT = 1.0
+
 if ML_MODEL_NAME == "RandomForest":
-    ml_model = joblib.load("./Model/RandomForest/model.gz")
+    ml_model = joblib.load("./model/train/RandomForest/model.gz")
 elif ML_MODEL_NAME == "XGBoost":
-    ml_model = joblib.load("./Model/XGBoost/model.gz")
+    ml_model = joblib.load("./model/train/XGBoost/model.gz")
+    COEFMULT = 100.0
 else:
     raise ValueError("Modelo de ML não reconhecido!")
 
@@ -68,6 +71,7 @@ def infer_offer_from_candidate(vacancy: JobVacancy, applicant: Applicant):
         logger.error("ML model not loaded")
         raise Exception("ML model not loaded")
 
+    logger.info(f"Using model {ML_MODEL_NAME}")
     try:
         logger.info("Mapping DTO to DataFrame")
         df = map_dto_to_df(vacancy, applicant)
@@ -87,11 +91,11 @@ def infer_offer_from_candidate(vacancy: JobVacancy, applicant: Applicant):
 
     except Exception as e:
         logger.error(f"Error during inference: {e}")
-        raise Exception("Error during inference")
+        raise Exception(f"Error during inference: {e}")
     
     logger.info("Inference completed successfully")
 
-    return {"acceptance_probability": acceptance_prob}
+    return {"acceptance_probability": acceptance_prob * COEFMULT}
 
 
 def map_dto_to_df(vacancy: JobVacancy, applicant: Applicant) -> pd.DataFrame:
@@ -155,12 +159,12 @@ def pre_process(df: pd.DataFrame) -> pd.DataFrame:
     vaga_cols = ['nivel_profissional', 'nivel_academico_vaga', 'outro_idioma_vaga',
                  'areas_atuacao', 'principais_atividades', 'demais_observacoes']
     df['vaga'] = df[vaga_cols].agg(' '.join, axis=1)
+    
+    df['comentario'] = ""
 
-    _df = df[['candidato', 'vaga', 'viagens_requeridas', 'pcd_match', 'ingles', 'espanhol']]
+    _df = df[['candidato', 'vaga', 'viagens_requeridas', 'pcd_match', 'ingles', 'espanhol', 'comentario']]
 
     _df.rename(columns={
-        'situacao_candidado': 'situacao',
-        'comentario': 'comentario',
         'viagens_requeridas': 'vaga_viagens_requeridas',
         'pcd_match': 'pcd',
         'ingles': 'nivel_ingles',
@@ -173,12 +177,12 @@ def pre_process(df: pd.DataFrame) -> pd.DataFrame:
 def apply_feature_transformation(df: pd.DataFrame) -> scipy.sparse.csr_matrix:
     vt_candidato = vectorizers["candidato"].transform(df['candidato'])
     vt_vaga = vectorizers["vaga"].transform(df['vaga'])
-    #vt_comentario = vectorizers["comentario"].transform(df['comentario'])
+    vt_comentario = vectorizers["comentario"].transform(df['comentario'])
 
     num_data = df[['vaga_viagens_requeridas', 'pcd', 'nivel_ingles', 'nivel_espanhol']]
     num_scaled = scaler.transform(num_data)
 
-    X_model_input = scipy.sparse.hstack([num_scaled, vt_candidato, vt_vaga]) # vt_comentario
+    X_model_input = scipy.sparse.hstack([num_scaled, vt_candidato, vt_vaga, vt_comentario])
 
     return X_model_input
 

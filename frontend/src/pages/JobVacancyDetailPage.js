@@ -27,7 +27,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  LinearProgress
+  LinearProgress,
+  Tooltip
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -42,7 +43,9 @@ import {
   Assignment as AssignmentIcon,
   Search as SearchIcon,
   ExpandMore as ExpandMoreIcon,
-  Visibility as VisibilityIcon, Insights
+  Visibility as VisibilityIcon,
+  Insights,
+  Psychology as PsychologyIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useParams, Link } from 'react-router-dom';
@@ -62,6 +65,10 @@ const JobVacancyDetailPage = () => {
   const [searchError, setSearchError] = useState('');
   const [searchSuccess, setSearchSuccess] = useState(false);
   const [foundCount, setFoundCount] = useState(0);
+  const [offerChances, setOfferChances] = useState({});
+  const [loadingOfferChances, setLoadingOfferChances] = useState({});
+  const [cvAnalysis, setCvAnalysis] = useState({});
+  const [loadingCvAnalysis, setLoadingCvAnalysis] = useState({});
 
   useEffect(() => {
     const fetchVacancyDetails = async () => {
@@ -132,6 +139,56 @@ const JobVacancyDetailPage = () => {
     }
   };
 
+  const getOfferChances = async (candidateId, professionalCode) => {
+    if (!vacancy || !candidateId) return;
+    
+    try {
+      setLoadingOfferChances(prev => ({ ...prev, [candidateId]: true }));
+      
+      const response = await axios.get(`/api/job-vacancies/${id}/offer-inference/${professionalCode}`);
+      
+      setOfferChances(prev => ({ 
+        ...prev, 
+        [candidateId]: response.data.acceptance_probability 
+      }));
+    } catch (err) {
+      console.error('Error getting offer chances:', err);
+      // Set a negative value to indicate error
+      setOfferChances(prev => ({ ...prev, [candidateId]: -1 }));
+    } finally {
+      setLoadingOfferChances(prev => ({ ...prev, [candidateId]: false }));
+    }
+  };
+
+  const analyzeCandidateCV = async (candidateId, similarity) => {
+    if (!vacancy || !candidateId) return;
+    
+    try {
+      setLoadingCvAnalysis(prev => ({ ...prev, [candidateId]: true }));
+      
+      const acceptanceProbability = offerChances[candidateId] || 0;
+      
+      const response = await axios.post(`/api/job-vacancies/${id}/analyze-cv`, {
+        candidate_id: candidateId,
+        similarity: similarity / 100,
+        acceptance_probability: acceptanceProbability
+      });
+      
+      setCvAnalysis(prev => ({ 
+        ...prev, 
+        [candidateId]: response.data.analysis 
+      }));
+    } catch (err) {
+      console.error('Error analyzing CV:', err);
+      setCvAnalysis(prev => ({
+        ...prev, 
+        [candidateId]: "Erro na análise do CV. Por favor, tente novamente mais tarde."
+      }));
+    } finally {
+      setLoadingCvAnalysis(prev => ({ ...prev, [candidateId]: false }));
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -157,6 +214,15 @@ const JobVacancyDetailPage = () => {
     if (normalizedScore > 0.4) return '#64b5f6'; // Light Blue
     if (normalizedScore > 0.2) return '#2196f3'; // Blue
     return '#1976d2'; // Dark Blue
+  };
+
+  // Function to get color based on acceptance probability
+  const getAcceptanceProbabilityColor = (probability) => {
+    if (probability > 0.8) return '#4caf50'; // Green
+    if (probability > 0.6) return '#81c784'; // Light Green
+    if (probability > 0.4) return '#ffa726'; // Orange
+    if (probability > 0.2) return '#ef6c00'; // Dark Orange
+    return '#d32f2f'; // Red
   };
 
   const drawerContent = (
@@ -244,7 +310,7 @@ const JobVacancyDetailPage = () => {
                     {candidate.area_atuacao || 'Area not specified'}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={2}>
+                <Grid item xs={12} sm={4}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box sx={{ width: '100%', mr: 1 }}>
                       <LinearProgress 
@@ -265,35 +331,103 @@ const JobVacancyDetailPage = () => {
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={2} sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-end', gap: 1 }}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="secondary"
-                    startIcon={<Insights />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      alert('This feature will be implemented in a future release.');
-                    }}
-                  >
-                    Offer Chances
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<VisibilityIcon />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigateTo(`/candidates/${candidate.id}`);
-                    }}
-                  >
-                    View Profile
-                  </Button>
-                </Grid>
               </Grid>
             </AccordionSummary>
             <AccordionDetails>
               <Box>
+                <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      color="secondary"
+                      startIcon={<Insights />}
+                      onClick={() => getOfferChances(candidate.id, candidate.codigo_profissional)}
+                      disabled={loadingOfferChances[candidate.id]}
+                    >
+                      Offer Chances
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      color="primary"
+                      startIcon={<PsychologyIcon />}
+                      onClick={() => analyzeCandidateCV(candidate.id, candidate.similarity)}
+                      disabled={loadingCvAnalysis[candidate.id]}
+                    >
+                      Analyze CV
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => navigateTo(`/candidates/${candidate.id}`)}
+                    >
+                      View Profile
+                    </Button>
+                  </Box>
+                  
+                  {/* Offer Chances Result Display */}
+                  {loadingOfferChances[candidate.id] ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                      <Typography variant="body2">Calculating offer chances...</Typography>
+                    </Box>
+                  ) : offerChances[candidate.id] !== undefined ? (
+                    offerChances[candidate.id] >= 0 ? (
+                      <Tooltip title="Probability that the candidate will accept an offer">
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" sx={{ mr: 1 }}>Acceptance Probability:</Typography>
+                          <Chip 
+                            label={`${Math.round(offerChances[candidate.id] * 100)}%`}
+                            sx={{ 
+                              backgroundColor: getAcceptanceProbabilityColor(offerChances[candidate.id]),
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          />
+                        </Box>
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="body2" color="error">
+                        Error calculating offer chances
+                      </Typography>
+                    )
+                  ) : null}
+                </Box>
+
+                {/* CV Analysis Section */}
+                {loadingCvAnalysis[candidate.id] && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 3 }}>
+                    <CircularProgress size={40} sx={{ mb: 2 }} />
+                    <Typography variant="body1" align="center">
+                      Analyzing CV with SombraLLM 🐕...
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" align="center">
+                      This may take a moment. Please be patient.
+                    </Typography>
+                  </Box>
+                )}
+
+                {cvAnalysis[candidate.id] && !loadingCvAnalysis[candidate.id] && (
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                      <PsychologyIcon sx={{ mr: 1 }} /> SombraLLM Analysis
+                    </Typography>
+                    <Paper 
+                      variant="outlined" 
+                      sx={{ 
+                        p: 2, 
+                        backgroundColor: '#f5f5f5',
+                        borderLeft: '4px solid #3f51b5',
+                        whiteSpace: 'pre-line'
+                      }}
+                    >
+                      {cvAnalysis[candidate.id]}
+                    </Paper>
+                  </Box>
+                )}
+
                 <Typography variant="subtitle2" gutterBottom>
                   Resume Highlights:
                 </Typography>
@@ -310,27 +444,6 @@ const JobVacancyDetailPage = () => {
                 >
                   {candidate.cv_pt || 'No resume available'}
                 </Paper>
-                <Box sx={{ mt: 2, display: { xs: 'flex', sm: 'none' }, justifyContent: 'center', gap: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => {
-                      // Placeholder for future implementation
-                      alert('This feature will be implemented in a future release.');
-                    }}
-                    sx={{ flex: 1 }}
-                  >
-                    Offer Chances
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<VisibilityIcon />}
-                    onClick={() => navigateTo(`/candidates/${candidate.id}`)}
-                    sx={{ flex: 1 }}
-                  >
-                    View Full Profile
-                  </Button>
-                </Box>
               </Box>
             </AccordionDetails>
           </Accordion>
