@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 import math
 
 from src.infra.database import get_db
+from src.candidates.applicant_service import ApplicantService
 from src.vacancies.job_vacancy_service import JobVacancyService
 from src.dtos.job_vacancy_dto import JobVacancyResponseDTO, JobVacancyListResponseDTO
+import src.vacancies.job_vacancy_predict as predict
 
 vacancies_router = APIRouter(
     prefix="/job-vacancies",
@@ -44,3 +46,27 @@ def list_job_vacancies(
         "page_size": page_size,
         "total_pages": total_pages
     }
+
+@vacancies_router.get("/{vacancy_id}/offer-inference/{applicant_id}", summary="Infer an offer for a candidate based on the given vacancy.")#response_model=OfferInferenceResult)
+def infer_offer_from_candidate(vacancy_id: int, applicant_id: int, db: Session = Depends(get_db)) :
+    
+    if vacancy_id is None  or vacancy_id <= 0:
+        raise HTTPException(status_code=400, detail="vacancy_id is required and must be greater than 0")
+    
+    if applicant_id is None or applicant_id <= 0:
+        raise HTTPException(status_code=400, detail="applicant_id is required and must be greater than 0")  
+    
+    job_service = JobVacancyService(db)
+    vacancy = job_service.get_job_vacancy(vacancy_id)
+    if vacancy is None:
+        raise HTTPException(status_code=404, detail="Job vacancy not found")
+
+    applicant_service = ApplicantService(db)
+    applicant = applicant_service.get_applicant(applicant_id)
+    if applicant is None:
+        raise HTTPException(status_code=404, detail="Applicant not found")
+    
+    try:
+        return predict.infer_offer_from_candidate(vacancy, applicant)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction has failed: {str(e)}")
