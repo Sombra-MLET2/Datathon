@@ -57,7 +57,20 @@ A human resource system that helps recruiters select better job candidates.
 
 ## Deployment - Docker
 
-TODO
+A multi-stage Dockerfile is available in the root folder.
+
+It will build the frontend, backend and move the data needed for deploying a fast and local infrastructure.
+
+* Build the image
+```bash
+     docker build -t sombra/datathon .
+     docker run --rm -p 8080:80 sombra/datathon
+```
+* Access the platform: http://localhost:8080
+* Login with:
+  * **user**: alice@email.com
+  * **pass**: alice123
+
 
 ## Note
 Because of the size of the files in the data directory, if you need to download them, run the following commands.

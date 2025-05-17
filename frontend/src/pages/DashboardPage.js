@@ -247,7 +247,7 @@ const DashboardPage = () => {
                   <li>View and search applicant profiles</li>
                   <li>Browse available job vacancies</li>
                   <li>Match candidates with suitable positions</li>
-                  <li>Generate reports on recruitment progress</li>
+                  <li>Generate reports on recruitment progress - v2.0</li>
                 </ul>
               </Paper>
             </Grid>
