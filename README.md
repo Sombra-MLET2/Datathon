@@ -2,6 +2,8 @@
 
 A human resource system that helps recruiters select better job candidates.
 
+![Python Tests](https://github.com/Sombra-MLET2/Datathon/actions/workflows/python-tests.yml/badge.svg)
+
 ## Features
 
 - Responsive UI
@@ -53,6 +55,15 @@ A human resource system that helps recruiters select better job candidates.
 ### Running the API with Frontend
 ```bash
   uvicorn src.main:app --host 0.0.0.0 --port 8000
+```
+
+### Running Tests
+```bash
+  # Run all unit tests
+  python -m pytest tests/unit/
+
+  # Run tests with coverage report
+  python -m pytest --cov=src --cov-report=term --cov-report=html
 ```
 
 ## Deployment - Docker
