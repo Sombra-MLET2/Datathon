@@ -61,6 +61,11 @@ A multi-stage Dockerfile is available in the root folder.
 
 It will build the frontend, backend and move the data needed for deploying a fast and local infrastructure.
 
+Before building the image, please visit the Note sections below for grabbing the complete data files.
+
+* With the datafiles obtained:
+  * Issue a post request to `/api/boostrap/embeddings` and `/api/bootstrap/sql` to start the local databases
+  * This process may take up to an hour depending on your hardware spcs
 * Build the image
 ```bash
      docker build -t sombra/datathon .
