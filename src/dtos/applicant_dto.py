@@ -11,7 +11,7 @@ class ApplicantBaseDTO(BaseModel):
     objetivo_profissional: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ApplicantCreateDTO(ApplicantBaseDTO):
@@ -92,7 +92,7 @@ class ApplicantResponseDTO(BaseModel):
     cv_en: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ApplicantListResponseDTO(BaseModel):

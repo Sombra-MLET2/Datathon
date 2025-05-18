@@ -9,7 +9,7 @@ class JobVacancyBaseDTO(BaseModel):
     tipo_contratacao: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class JobVacancyCreateDTO(JobVacancyBaseDTO):
@@ -76,7 +76,7 @@ class JobVacancyResponseDTO(BaseModel):
     valor_compra_2: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class JobVacancyListResponseDTO(BaseModel):

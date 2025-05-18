@@ -13,3 +13,5 @@ data/chroma_storage/**/*.pickle
 
 **/node_modules/
 **/build/
+
+.coverage*

@@ -13,6 +13,6 @@ JWT_EXPIRY = os.getenv('JWT_EXPIRY') if os.getenv('JWT_EXPIRY') else 30
 ML_MODEL_NAME = "XGBoost"
 
 # Ollama configuration
-OLLAMA_HOST = "192.168.50.144:11434"
+OLLAMA_HOST = "192.168.50.140:11434" # 4080S
 OLLAMA_MODEL = "mistral:latest"
 OLLAMA_REQUEST_TIMEOUT = 180
