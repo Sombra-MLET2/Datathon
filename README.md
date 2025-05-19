@@ -20,7 +20,7 @@ A human resource system that helps recruiters select better job candidates.
 ### Machine Learning Models
 **XGBoost and Random Forest Models**: Two machine learning models for candidate evaluation and recommendation were provided.
 
-XGBoost is the standard choice(Check results below) as it offers superior prediction quality but requires even though its training time is 10x the RandomForest.
+XGBoost is the standard choice (Check results below) as it offers superior prediction quality even though it requires a training time of over 10x the RandomForest.
 
 ### Vector Database
 **ChromaDB** was selected as the persistent vector database for semantic search capabilities. The system uses ChromaDB to store and query candidate embeddings, enabling efficient similarity searches across candidate profiles.
