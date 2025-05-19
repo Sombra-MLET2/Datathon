@@ -13,6 +13,28 @@ A human resource system that helps recruiters select better job candidates.
 - Candidates recommended by vacancy
 - Candidates chance to receive an offer—TODO
 
+## Architecture and Component
+
+![High level](imgs/hr.png)
+
+### Machine Learning Models
+**XGBoost and Random Forest Models**: Two machine learning models for candidate evaluation and recommendation were provided.
+
+XGBoost is the standard choice(Check results below) as it offers superior prediction quality but requires even though its training time is 10x the RandomForest.
+
+### Vector Database
+**ChromaDB** was selected as the persistent vector database for semantic search capabilities. The system uses ChromaDB to store and query candidate embeddings, enabling efficient similarity searches across candidate profiles.
+
+The implementation uses the multilingual MiniLM-L12-v2 model from Sentence Transformers.
+
+### Language Model Infrastructure
+**Ollama** serves as the local LLM runner that hosts and manages the language model. The implementation provides a clean API interface for generating text responses with configurable parameters with many different language models.
+
+### Small Language Model
+**Mistral 7B** was deployed through Ollama as a lightweight yet powerful language model for generating content. The model is used for analysing candidate profiles, job descriptions, and providing insights without the overhead of larger models.
+
+Mistral 7B offers a good balance between performance and resource requirements, making it suitable for deployment in environments with limited computational resources.
+
 ## API Endpoints
 
 - `/api/sessions` - User authentication
